@@ -23,7 +23,7 @@ export const zipIntents = async (project: DFESProject): Promise<JSZip> => {
   }
 
   zip.file('intents/Default Fallback Intent.json', serialize(createDefaultFallbackIntent()));
-  zip.file('intents/Default Welcome Intent_usersays_en.json', serialize(createDefaultWelcomeIntent()));
+  zip.file('intents/Default Welcome Intent_usersays_en.json', serialize(createDefaultWelcomeIntentUtterances()));
   zip.file('intents/Default Welcome Intent.json', serialize(createDefaultWelcomeIntent()));
 
   const prefix = join(__dirname, '..', 'project_unzipped');
