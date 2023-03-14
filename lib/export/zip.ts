@@ -27,7 +27,7 @@ export const zipIntents = async (project: DFESProject): Promise<JSZip> => {
   zip.file('intents/Default Welcome Intent.json', serialize(createDefaultWelcomeIntent()));
 
   const prefix = join(__dirname, '..', 'project_unzipped');
-  await fs.rm(prefix, { recursive: true });
+  await fs.rm(prefix, { recursive: true, force: true });
   await fs.mkdir(prefix, { recursive: true });
 
   for (const file of Object.values(zip.files)) {
