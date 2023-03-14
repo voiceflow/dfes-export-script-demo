@@ -17,10 +17,10 @@ On the root level of this repository,
 
 1. Run `yarn install` to install the dependencies
 2. Run `yarn build` to compile the tool
-3. Run `yarn start [PATH TO FILE]`, or `yarn start` to export a `project.vf` file stored in this directory
+3. Run `yarn start [PATH TO FILE]`, or `yarn start` to convert a `project.vf` file stored in this directory
 
 `[PATH TO FILE]` is where the `.vf` file was saved earlier.
-If the file was called `project.vf` was on my Desktop, it would be `npm run export ~/Desktop/project.vf`
+If the file was called `project.vf` was on my Desktop, it would be `yarn start ~/Desktop/project.vf`
 
 This will produce a `.zip` file with the same name (ex. `project.vf` -> `project.zip`).
 This file contains a DFES export containing entities, intents, and their responses.
