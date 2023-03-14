@@ -6,6 +6,7 @@ import { isVariableElement } from '@voiceflow/slate-serializer';
 import { Element } from 'slate';
 import { SLOT_REGEXP } from '@voiceflow/common';
 import { transliterate } from 'transliteration';
+import * as Slate from 'slate';
 
 export const sanitizeResourceName = (name: string): string =>
   // Try our best to keep the sanitized name close to the original
@@ -73,3 +74,9 @@ export const promptToString = (prompt?: VoiceflowUtils.prompt.AnyPrompt | null):
 
   return serializeToText(sanitizedPrompt ?? [], { encodeVariables: false });
 };
+
+export const slateToPlaintext = (content: Readonly<BaseText.SlateTextValue> = []): string =>
+  content
+    .map((n) => Slate.Node.string(n))
+    .join('\n')
+    .trim();

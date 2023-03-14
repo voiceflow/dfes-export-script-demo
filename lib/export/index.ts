@@ -6,7 +6,7 @@ import { getSteps } from './diagram';
 import { voiceflowToDFESEntity } from './entity';
 import { generateDFESUtterancesForIntent, voiceflowToDFESIntent } from './intent';
 import { DFESIntent, DFESProject } from './types';
-import { getDFESSlotType, sanitizeResourceName } from './utils';
+import { getDFESSlotType, sanitizeResourceName, slateToPlaintext } from './utils';
 import { zipIntents } from './zip';
 
 async function main() {
@@ -54,7 +54,13 @@ async function main() {
 
         // Get the next step, and check if it's a speak or text step
         const nextStep = stepsArray[index + 1];
-        if (Utils.step.isSpeak(nextStep) || Utils.step.isText(nextStep)) {
+        if (Utils.step.isText(nextStep)) {
+          dfesIntent = voiceflowToDFESIntent(
+            intent,
+            slotMap,
+            nextStep.data.texts.map((dialog) => slateToPlaintext(dialog.content))
+          );
+        } else if (Utils.step.isSpeak(nextStep)) {
           dfesIntent = voiceflowToDFESIntent(
             intent,
             slotMap,
