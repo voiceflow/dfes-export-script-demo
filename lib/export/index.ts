@@ -90,7 +90,7 @@ async function main() {
         const [canonical] = split;
 
         return {
-          canonical: canonical.trim(),
+          value: canonical.trim(),
           // DFES includes the canonical value as a synonym
           synonyms: split.map((synonym) => synonym.trim()),
         };
@@ -101,8 +101,7 @@ async function main() {
   const exportFileName = `${readFileName}.zip`;
   const writePathName = path.join(readFileDirectory, exportFileName);
 
-  const zip = await zipIntents(dfesProject);
-  await fs.writeFile(writePathName, await zip.generateAsync({ type: 'nodebuffer', streamFiles: true }));
+  await zipIntents(dfesProject, writePathName);
 
   console.log(`Successfully exported project to ${exportFileName}`);
 }

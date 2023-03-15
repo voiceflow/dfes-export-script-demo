@@ -31,7 +31,7 @@ const createSSML = (text: string, voice?: unknown): string => {
 };
 
 export const getDFESSlotType = (slot: BaseModels.Slot): string | undefined =>
-  slot.type.value === 'Custom' ? `@${slot.type.value}` : DFESConstants.VIUCEFLOW_TO_DIALOGFLOW_SLOT_TYPE_MAP[slot.type.value];
+  slot.type.value === 'Custom' ? `@${slot.type.value}` : DFESConstants.VIUCEFLOW_TO_DIALOGFLOW_SLOT_TYPE_MAP[slot.type.value] ?? `@${slot.name}`;
 
 export const isCustomType = (slotType: string): boolean => !slotType.startsWith('@sys.');
 

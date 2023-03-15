@@ -27,7 +27,7 @@ export type DFESIntent = {
         title: string;
         textToSpeech: string;
         lang: string;
-        speech: string;
+        speech: string[];
         condition: string;
       }>;
       speech: [];
@@ -52,9 +52,9 @@ export type DFESIntentUttererances = Array<{
       }
     | {
         text: string;
-        userDefined: boolean;
         meta: string;
         alias: string;
+        userDefined: boolean;
       }
   >;
   isTemplate: boolean;
@@ -79,7 +79,7 @@ export type DFESEntity = {
 };
 
 type DFESEntityUtterances = {
-  canonical: string;
+  value: string;
   synonyms: string[];
 };
 

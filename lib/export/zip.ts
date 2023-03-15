@@ -1,30 +1,46 @@
 import JSZip from 'jszip';
-import { join } from 'path';
+import path, { join } from 'path';
 import fs from 'fs/promises';
 
 import { DFESProject } from './types';
+import { randomUUID } from 'crypto';
+import execa from 'execa';
+
+const SECONDARY_KEY = '72475410b7fb4cebafa12284672cb9ce';
 
 const serialize = (obj: any) => JSON.stringify(obj, null, 2);
 
-export const zipIntents = async (project: DFESProject): Promise<JSZip> => {
+const addUnicodeLiterals = (string: string) => string.replace(/\\\\u\d+/g, (x) => '\\' + x.slice(2));
+
+const JSZIP_OPTIONS = {
+  createFolders: false,
+};
+export const zipIntents = async (project: DFESProject, outputPath: string): Promise<void> => {
   const zip = JSZip();
 
-  zip.file('package.json', serialize(createPackage()));
-  zip.file('agent.json', serialize(createAgent(project)));
-
-  for (const intent of project.intents) {
-    zip.file(`intents/${intent.intent.name}.json`, serialize(intent.intent));
-    zip.file(`intents/${intent.intent.name}_usersays_en.json`, serialize(intent.utterances));
-  }
+  zip.file('package.json', serialize(createPackage()), JSZIP_OPTIONS);
+  zip.file(
+    'agent.json',
+    serialize(createAgent(project)).replace('"knowledgeServiceConfidenceAdjustment": 0', '"knowledgeServiceConfidenceAdjustment": 0.0'),
+    JSZIP_OPTIONS
+  );
 
   for (const entity of project.entities) {
-    zip.file(`entities/${entity.entity.name}.json`, serialize(entity.entity));
-    zip.file(`entities/${entity.entity.name}_entries_en.json`, serialize(entity.values));
+    zip.file(`entities/${entity.entity.name}.json`, serialize(entity.entity), JSZIP_OPTIONS);
+    zip.file(`entities/${entity.entity.name}_entries_en.json`, serialize(entity.values), JSZIP_OPTIONS);
   }
 
-  zip.file('intents/Default Fallback Intent.json', serialize(createDefaultFallbackIntent()));
-  zip.file('intents/Default Welcome Intent_usersays_en.json', serialize(createDefaultWelcomeIntentUtterances()));
-  zip.file('intents/Default Welcome Intent.json', serialize(createDefaultWelcomeIntent()));
+  for (const intent of project.intents) {
+    zip.file(`intents/${intent.intent.name}.json`, addUnicodeLiterals(serialize(intent.intent)), JSZIP_OPTIONS);
+  }
+
+  zip.file('intents/Default Fallback Intent.json', addUnicodeLiterals(serialize(createDefaultFallbackIntent())), JSZIP_OPTIONS);
+  zip.file('intents/Default Welcome Intent.json', addUnicodeLiterals(serialize(createDefaultWelcomeIntent())), JSZIP_OPTIONS);
+
+  for (const intent of project.intents) {
+    zip.file(`intents/${intent.intent.name}_usersays_en.json`, addUnicodeLiterals(serialize(intent.utterances)), JSZIP_OPTIONS);
+  }
+  zip.file('intents/Default Welcome Intent_usersays_en.json', addUnicodeLiterals(serialize(createDefaultWelcomeIntentUtterances())), JSZIP_OPTIONS);
 
   const prefix = join(__dirname, '..', 'project_unzipped');
   await fs.rm(prefix, { recursive: true, force: true });
@@ -32,13 +48,16 @@ export const zipIntents = async (project: DFESProject): Promise<JSZip> => {
 
   for (const file of Object.values(zip.files)) {
     if (file.dir) {
-      await fs.mkdir(join(prefix, file.name), { recursive: true });
+      throw new RangeError("Zip file contains a directory (which doesn't match DFES format)");
     } else {
+      await fs.mkdir(path.dirname(join(prefix, file.name)), { recursive: true });
+
       await fs.writeFile(join(prefix, file.name), await file.async('nodebuffer'));
     }
   }
 
-  return zip;
+  await fs.rm(outputPath, { recursive: true, force: true });
+  await execa('zip', ['-r', outputPath, './project_unzipped/'], { cwd: path.join(__dirname, '..') });
 };
 
 const createAgent = (project: DFESProject) => {
@@ -58,7 +77,7 @@ const createAgent = (project: DFESProject) => {
     supportedLanguages: [],
     enableOnePlatformApi: true,
     onePlatformApiVersion: 'v2',
-    secondaryKey: '',
+    secondaryKey: SECONDARY_KEY,
     analyzeQueryTextSentiment: false,
     enabledKnowledgeBaseNames: [],
     knowledgeServiceConfidenceAdjustment: 0.0,
@@ -73,7 +92,7 @@ const createPackage = () => {
 };
 
 const createDefaultFallbackIntent = () => ({
-  id: 'e8d20f8d-0bf9-464a-a7a4-e928763ec643',
+  id: randomUUID(),
   name: 'Default Fallback Intent',
   auto: true,
   contexts: [],
@@ -90,17 +109,17 @@ const createDefaultFallbackIntent = () => ({
           textToSpeech: '',
           lang: 'en',
           speech: [
-            'I didn\u0027t get that. Can you say it again?',
+            'I didn\\u0027t get that. Can you say it again?',
             'I missed what you said. What was that?',
             'Sorry, could you say that again?',
             'Sorry, can you say that again?',
             'Can you say that again?',
-            'Sorry, I didn\u0027t get that. Can you rephrase?',
+            'Sorry, I didn\\u0027t get that. Can you rephrase?',
             'Sorry, what was that?',
             'One more time?',
             'What was that?',
             'Say that one more time?',
-            'I didn\u0027t get that. Can you repeat?',
+            'I didn\\u0027t get that. Can you repeat?',
             'I missed that, say that again?',
           ],
           condition: '',
@@ -121,7 +140,7 @@ const createDefaultFallbackIntent = () => ({
 
 const createDefaultWelcomeIntentUtterances = () => [
   {
-    id: '13ea76e4-fdc1-42b1-ad81-6fbba8bd958f',
+    id: randomUUID(),
     data: [
       {
         text: 'just going to say hi',
@@ -254,7 +273,7 @@ const createDefaultWelcomeIntentUtterances = () => [
     id: '01110b4b-c837-49de-83a3-5a853756286f',
     data: [
       {
-        text: 'lovely day isn\u0027t it',
+        text: 'lovely day isn\\u0027t it',
         userDefined: false,
       },
     ],
@@ -331,7 +350,7 @@ const createDefaultWelcomeIntentUtterances = () => [
 ];
 
 const createDefaultWelcomeIntent = () => ({
-  id: 'f442b758-85d0-4172-8529-99467787a42c',
+  id: randomUUID(),
   name: 'Default Welcome Intent',
   auto: true,
   contexts: [],

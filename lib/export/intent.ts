@@ -43,7 +43,11 @@ export const voiceflowToDFESIntent = (intent, slotsByID: Map<string, BaseModels.
           title: '',
           textToSpeech: '',
           lang: 'en',
-          speech: response,
+          speech: [
+            // Replace special characters with their unicode escape sequence
+            // Ex ' -> \u0027
+            response.replace(/[\u0027\u0022\u005C]/g, (x) => `\\u${x.charCodeAt(0).toString(16).padStart(4, '0')}`),
+          ],
           condition: '',
         })),
         speech: [],
@@ -93,9 +97,9 @@ export const generateDFESUtterancesForIntent = (intent: BaseModels.Intent, slotM
         // Add the entity
         data.push({
           text: sample.trim(),
-          userDefined: false,
-          alias: entity.entity.startsWith('sys.') ? entity.entity.slice('sys.'.length) : entity.entity,
           meta: `@${entity.entity}`,
+          alias: entity.entity.startsWith('sys.') ? entity.entity.slice('sys.'.length) : entity.entity,
+          userDefined: false,
         });
 
         // Skip past this slice of text
@@ -120,8 +124,8 @@ export const generateDFESUtterancesForIntent = (intent: BaseModels.Intent, slotM
       data: data,
       isTemplate: false,
       count: 0,
-      updated: 0,
       lang: 'en',
+      updated: 0,
     };
   });
 };
