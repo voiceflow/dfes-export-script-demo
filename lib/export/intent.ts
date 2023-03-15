@@ -43,11 +43,7 @@ export const voiceflowToDFESIntent = (intent, slotsByID: Map<string, BaseModels.
           title: '',
           textToSpeech: '',
           lang: 'en',
-          speech: [
-            // Replace special characters with their unicode escape sequence
-            // Ex ' -> \u0027
-            response.replace(/[\u0027\u0022\u005C]/g, (x) => `\\u${x.charCodeAt(0).toString(16).padStart(4, '0')}`),
-          ],
+          speech: [response],
           condition: '',
         })),
         speech: [],

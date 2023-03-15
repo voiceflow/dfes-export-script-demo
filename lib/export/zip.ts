@@ -10,7 +10,7 @@ const SECONDARY_KEY = '72475410b7fb4cebafa12284672cb9ce';
 
 const serialize = (obj: any) => JSON.stringify(obj, null, 2);
 
-const addUnicodeLiterals = (string: string) => string.replace(/\\\\u\d+/g, (x) => '\\' + x.slice(2));
+const addUnicodeLiterals = (string: string) => string;
 
 const JSZIP_OPTIONS = {
   createFolders: false,
@@ -109,17 +109,17 @@ const createDefaultFallbackIntent = () => ({
           textToSpeech: '',
           lang: 'en',
           speech: [
-            'I didn\\u0027t get that. Can you say it again?',
+            'I didn\u0027t get that. Can you say it again?',
             'I missed what you said. What was that?',
             'Sorry, could you say that again?',
             'Sorry, can you say that again?',
             'Can you say that again?',
-            'Sorry, I didn\\u0027t get that. Can you rephrase?',
+            'Sorry, I didn\u0027t get that. Can you rephrase?',
             'Sorry, what was that?',
             'One more time?',
             'What was that?',
             'Say that one more time?',
-            'I didn\\u0027t get that. Can you repeat?',
+            'I didn\u0027t get that. Can you repeat?',
             'I missed that, say that again?',
           ],
           condition: '',
@@ -273,7 +273,7 @@ const createDefaultWelcomeIntentUtterances = () => [
     id: '01110b4b-c837-49de-83a3-5a853756286f',
     data: [
       {
-        text: 'lovely day isn\\u0027t it',
+        text: 'lovely day isn\u0027t it',
         userDefined: false,
       },
     ],
